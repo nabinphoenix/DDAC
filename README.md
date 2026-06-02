@@ -90,6 +90,10 @@ AWS Access Key ID     : ASIAXXXXXXXXXXXXX
 
 AWS Secret Access Key : XXXXXXXXXXXXX
 
+AWS Session Token : XXXXXX (Paste the long session token here)
+
+Note: If `aws configure` prompts you for the AWS Session Token, enter it here and skip Step 3. If it does not prompt for the session token, follow Step 3 to configure it manually.
+
 Default region name   : us-east-1
 
 Default output format : json
@@ -119,7 +123,7 @@ Expected:
 
 ```json
 {
-  "UserId": "AROAXXXXXXXXX",
+  "UserId": "AROAXXXXXXXXX:user47XX049=YOUR_Name",
 
   "Account": "123456789012",
 
@@ -148,7 +152,7 @@ Application Name : your-app-name
 
 Environment Name : your-app-env
 
-Platform : PHP 8.5 running on 64bit Amazon Linux 2023
+Platform : PHP 
 
 Application Code : Sample Application
 ```
@@ -184,14 +188,14 @@ Domain : your-app-env.eba-xxxxxxxx.us-east-1.elasticbeanstalk.com
 ```text
 your-project/
 
-├── .ebextensions/
+├── .ebextensions/ (You will create this)
 │   └── nginx.config
 
-├── .github/
+├── .github/ (You will create this)
 │   └── workflows/
 │       └── deploy.yml
 
-├── images/
+├── images/ (Your application folder or other assets)
 
 ├── index.html
 
@@ -199,7 +203,7 @@ your-project/
 
 ├── style.css
 
-└── README.md
+└── README.md (These are sample files — your actual app files and folders should be placed here in the project root)
 ```
 
 ---
@@ -432,5 +436,4 @@ us-west-2
 
 *The guide is created based on practical experience with AWS Academy Learner Labs by Nabin Nepali.*
 
-```
-```
+
