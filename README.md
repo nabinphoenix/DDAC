@@ -76,9 +76,15 @@ aws configure
 Enter your values:
 ```
 AWS Access Key ID     : ASIAXXXXXXXXXXXXXXXXXXX
+
 AWS Secret Access Key : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 AWS Session Token : XXXXXX (Paste the long session token here)
-Note: If `aws configure` prompts you for the AWS Session Token, enter it here and skip Step 3. If it does not prompt for the session token, follow Step 3 to configure it manually.
+
+Note: If `aws configure` prompts you for the AWS Session Token, enter it here and skip Step 3.
+
+If it does not prompt for the session token, follow Step 3 to configure it manually.
+
 Default region name  : us-east-1
 Default output format: json
 ```
@@ -89,27 +95,7 @@ Default output format: json
 aws configure set aws_session_token YOUR_SESSION_TOKEN_HERE
 ```
 
-### Step 4: Verify credentials file
 
-Your credentials are stored at:
-```
-C:\Users\YOUR_USERNAME\.aws\credentials
-```
-
-Check the file:
-```cmd
-type "C:\Users\YOUR_USERNAME\.aws\credentials"
-```
-
-It should show:
-```ini
-[default]
-aws_access_key_id = ASIAXXXXXXXXXXXXXXXXXXX
-aws_secret_access_key = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-aws_session_token = IQoJb3Jp....
-```
-
----
 
 ## 3. Verify Connection
 
@@ -140,11 +126,11 @@ Elastic Beanstalk is AWS's **Platform as a Service (PaaS)** — it manages serve
 
 ### Step 1: Go to AWS Console
 
-1. Go to your **Cloud Labs portal** → Click **"AWS"** to open console
+1. Go to your **AWS console** → Click **"AWS"** to open console
 2. Search for **"Elastic Beanstalk"** in the search bar
-3. Click **"Create application"**
+3. Click **"Create environment"**
 
-### Step 2: Configure the application
+### Step 2: Configure the environment
 
 Fill in these settings:
 
@@ -165,7 +151,7 @@ EC2 key pair        : vockey
 IAM instance profile: LabInstanceProfile
 ```
 
-Click **Save** → Click **Create application**
+Click **Save** → Click **Create environment**
 
 > ⏳ Wait 3-5 minutes for environment to launch.
 
@@ -447,6 +433,14 @@ your-project/
 > ⚠️ **Critical:** Files must be in the **ROOT** of the zip, not inside a subfolder!
 
 ---
+
+
+
+
+
+
+
+
 
 ## 7. Every New Lab Session Checklist
 
