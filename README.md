@@ -1,197 +1,202 @@
 # AWS Complete Setup Guide
-### AWS CLI + Elastic Beanstalk + GitHub Actions CI/CD Pipeline
+### AWS CLI + CI/CD Pipeline with Elastic Beanstalk
 
 ---
 
 ## Table of Contents
-
-1. [Install AWS CLI](#install-aws-cli)
-2. [Configure AWS Credentials](#configure-aws-credentials)
-3. [Verify Connection](#verify-connection)
-4. [Setup Elastic Beanstalk Environment](#setup-elastic-beanstalk-environment)
-5. [Setup CI/CD Pipeline with GitHub Actions](#setup-cicd-pipeline-with-github-actions)
-6. [Every New Lab Session Checklist](#every-new-lab-session-checklist)
-7. [Common Errors and Fixes](#common-errors-and-fixes)
-8. [AWS CLI vs AWS Console](#aws-cli-vs-aws-console)
-9. [AWS Services Used](#aws-services-used)
-10. [Important Notes for AWS Learner Labs](#important-notes-for-aws-learner-labs)
-11. [Resources](#resources)
+1. [Install AWS CLI](#1-install-aws-cli)
+2. [Configure AWS Credentials](#2-configure-aws-credentials)
+3. [Verify Connection](#3-verify-connection)
+4. [Setup Elastic Beanstalk Environment](#4-setup-elastic-beanstalk-environment)
+5. [Setup CI/CD Pipeline with GitHub Actions](#5-setup-cicd-pipeline-with-github-actions)
+6. [Project Structure](#6-project-structure)
+7. [Every New Lab Session Checklist](#7-every-new-lab-session-checklist)
+8. [Common Errors and Fixes](#8-common-errors-and-fixes)
 
 ---
 
-# Install AWS CLI
+## 1. Install AWS CLI
 
-## Step 1: Check if AWS CLI is already installed
+### Step 1: Check if AWS CLI is already installed
 
-Open VS Code → Open Terminal (`Ctrl + ~`)
-
-Run:
+Open **VS Code** → open **Terminal** (`Ctrl + `` ` ``) and run:
 
 ```cmd
 aws --version
-````
+```
 
-If installed:
-
-```text
+**If you see this → AWS CLI is already installed ✅:**
+```
 aws-cli/2.x.x Python/3.x.x Windows/11 exe/AMD64
 ```
 
-If not installed:
+**If you get an error → Install AWS CLI:**
 
-[AWS CLI v2 Download](https://awscli.amazonaws.com/AWSCLIV2.msi)
+Download the official AWS CLI v2 installer for Windows:
 
-Install and click:
+👉 **[Download AWS CLI v2](https://awscli.amazonaws.com/AWSCLIV2.msi)**
 
-```text
-Next → Next → Install → Finish
-```
-
-Restart VS Code.
-
-Verify:
-
-```cmd
-aws --version
-```
+After downloading:
+1. Double-click the `.msi` file
+2. Click **Next → Next → Install**
+3. Click **Finish**
+4. **Restart VS Code**
+5. Run `aws --version` again to verify
 
 ---
 
-# Configure AWS Credentials
+## 2. Configure AWS Credentials
 
-## Step 1: Get Credentials
+You need AWS credentials to connect your terminal to your AWS account. These come from your **AWS Learner Lab** or **AWS Account**.
 
-From AWS Learner Lab:
+### Step 1: Get your credentials
 
-1. Start Lab
-2. Click AWS Details
-3. Copy:
+**From AWS Learner Lab:**
+1. Go to your Cloud Labs portal
+2. Click **"Start Lab"**
+3. Click **"AWS Details"**
+4. Copy the 3 credential values:
 
-```text
-aws_access_key_id
-
-aws_secret_access_key
-
-aws_session_token
+```
+aws_access_key_id     = ASIAXXXXXXXXXXXXXXXXXXX
+aws_secret_access_key = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+aws_session_token     = IQoJb3Jp.... (very long token)
 ```
 
----
+> ⚠️ **Important:** Keys starting with `ASIA` are **temporary** and expire after ~4 hours or when you end the lab session!
 
-## Step 2: Configure Credentials
+### Step 2: Configure AWS CLI
+
+Run in terminal:
 
 ```cmd
 aws configure
 ```
 
-Example:
-
-```text
-AWS Access Key ID     : ASIAXXXXXXXXXXXXX
-
-AWS Secret Access Key : XXXXXXXXXXXXX
-
+Enter your values:
+```
+AWS Access Key ID     : ASIAXXXXXXXXXXXXXXXXXXX
+AWS Secret Access Key : XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 AWS Session Token : XXXXXX (Paste the long session token here)
-
 Note: If `aws configure` prompts you for the AWS Session Token, enter it here and skip Step 3. If it does not prompt for the session token, follow Step 3 to configure it manually.
-
-Default region name   : us-east-1
-
-Default output format : json
+Default region name  : us-east-1
+Default output format: json
 ```
 
----
-
-## Step 3: Configure Session Token
-
-AWS Learner Labs uses temporary credentials requiring session tokens.
+### Step 3: Set Session Token (Required for Learner Labs)
 
 ```cmd
-aws configure set aws_session_token YOUR_SESSION_TOKEN
+aws configure set aws_session_token YOUR_SESSION_TOKEN_HERE
 ```
 
-If already configured, you may skip.
+### Step 4: Verify credentials file
+
+Your credentials are stored at:
+```
+C:\Users\YOUR_USERNAME\.aws\credentials
+```
+
+Check the file:
+```cmd
+type "C:\Users\YOUR_USERNAME\.aws\credentials"
+```
+
+It should show:
+```ini
+[default]
+aws_access_key_id = ASIAXXXXXXXXXXXXXXXXXXX
+aws_secret_access_key = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+aws_session_token = IQoJb3Jp....
+```
 
 ---
 
-# Verify Connection
+## 3. Verify Connection
+
+Run this command to verify you are connected to AWS:
 
 ```cmd
 aws sts get-caller-identity
 ```
 
-Expected:
-
+**Successful response looks like:**
 ```json
 {
-  "UserId": "AROAXXXXXXXXX:user47XX049=YOUR_Name",
-
-  "Account": "123456789012",
-
-  "Arn": "arn:aws:sts::123456789012:assumed-role/..."
+    "UserId": "AROAXXXXXXXXXXXXXXXXX:user123=Your_Name",
+    "Account": "123456789012",
+    "Arn": "arn:aws:sts::123456789012:assumed-role/voclabs/user123=Your_Name"
 }
 ```
 
-If:
+✅ If you see your Account ID and Arn → **You are connected!**
 
-```text
-ExpiredTokenException
-```
-
-Refresh credentials.
+❌ If you see `ExpiredTokenException` → Your session expired, get new credentials and repeat Step 3.
 
 ---
 
-# Setup Elastic Beanstalk Environment
+## 4. Setup Elastic Beanstalk Environment
 
-Elastic Beanstalk → Create Application
+Elastic Beanstalk is AWS's **Platform as a Service (PaaS)** — it manages servers, load balancing, and scaling for you.
 
-Configuration:
+### Step 1: Go to AWS Console
 
-```text
-Application Name : your-app-name
+1. Go to your **Cloud Labs portal** → Click **"AWS"** to open console
+2. Search for **"Elastic Beanstalk"** in the search bar
+3. Click **"Create application"**
 
-Environment Name : your-app-env
+### Step 2: Configure the application
 
-Platform : PHP 
+Fill in these settings:
 
-Application Code : Sample Application
+```
+Application name  : your-app-name
+Environment name  : your-app-env
+Platform          : PHP 8.5 running on 64bit Amazon Linux 2023
+Application code  : Sample application
 ```
 
-Security Settings:
+### Step 3: Configure service access (Important!)
 
-```text
-Service Role : LabRole
+Click **"Configure more options"** → scroll to **Security** → click **Edit**:
 
-EC2 Key Pair : vockey
-
-IAM Instance Profile : LabInstanceProfile
+```
+Service role        : LabRole
+EC2 key pair        : vockey
+IAM instance profile: LabInstanceProfile
 ```
 
-Wait 3–5 minutes.
+Click **Save** → Click **Create application**
 
-Expected:
+> ⏳ Wait 3-5 minutes for environment to launch.
 
-```text
-Health : OK
+### Step 4: Verify environment is running
 
-Platform : PHP 8.5
-
-Domain : your-app-env.eba-xxxxxxxx.us-east-1.elasticbeanstalk.com
+You should see:
+```
+Health    : ✅ Ok
+Domain    : your-app-env.eba-xxxxxxxx.us-east-1.elasticbeanstalk.com
+Platform  : PHP 8.5 running on 64bit Amazon Linux 2023
 ```
 
 ---
 
-# Setup CI/CD Pipeline with GitHub Actions
+## 5. Setup CI/CD Pipeline with GitHub Actions
 
-## Step 1: Project Structure
+This automatically deploys your code to Elastic Beanstalk every time you push to GitHub!
+
+```
+You push code → GitHub Actions triggers → Deploys to Elastic Beanstalk → Site is live!
+```
+
+### Step 1: Project Structure
 
 ```text
 your-project/
 
-├── .ebextensions/ (You will create this)
+├── .ebextensions/
 │   └── nginx.config
 
-├── .github/ (You will create this)
+├── .github/
 │   └── workflows/
 │       └── deploy.yml
 
@@ -208,15 +213,72 @@ your-project/
 
 ---
 
-## Step 2: Create nginx.config
+### Step 1.1: GitHub Repository Setup
 
-File:
+Here you have two options:
 
-```text
-.ebextensions/nginx.config
+#### Option A (Direct Upload)
+
+Create a repository and upload your existing project folder directly to GitHub using drag and drop.
+
+---
+
+#### Option B (Recommended)
+
+First create only the GitHub repository, then we will:
+
+* Set up a local repository
+* Connect it to GitHub
+* Create the AWS deployment configuration files
+* Push everything to GitHub
+
+> I recommend Option B because it is cleaner and easier to manage.
+
+---
+
+#### Create Repository
+
+1. Open GitHub.
+2. Click **New Repository**.
+3. Enter a repository name.
+4. Click **Create Repository**.
+
+---
+
+Open a terminal inside your application folder (where your project files exist).
+
+Move into your project folder:
+
+```cmd
+cd YOUR_PROJECT_FOLDER
 ```
 
-Content:
+Initialize a local Git repository:
+
+```cmd
+git init
+```
+
+Connect the local repository to GitHub:
+
+```cmd
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+```
+
+Replace the URL with your actual GitHub repository URL.
+
+---
+
+### Step 2: Create Elastic Beanstalk Configuration File
+
+Create the folder and open the file:
+
+```cmd
+mkdir .ebextensions
+notepad .ebextensions\nginx.config
+```
+
+Paste the following content and save:
 
 ```yaml
 option_settings:
@@ -224,19 +286,19 @@ option_settings:
     document_root: "/"
 ```
 
-> ⚠️ Make sure project files are not inside nested folders.
-
 ---
 
-## Step 3: Create Workflow
+### Step 3: Create GitHub Actions Workflow
 
-File:
+Create the folders and open the workflow file:
 
-```text
-.github/workflows/deploy.yml
+```cmd
+mkdir .github
+mkdir .github\workflows
+notepad .github\workflows\deploy.yml
 ```
 
-Content:
+Paste the following content and save:
 
 ```yaml
 name: Deploy to AWS Elastic Beanstalk
@@ -271,169 +333,215 @@ jobs:
         uses: einaregilsson/beanstalk-deploy@v22
 
         with:
-
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
           aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
-
           region: us-east-1
-
           application_name: YOUR_APP_NAME
-
           environment_name: YOUR_ENV_NAME
-
           version_label: v-${{ github.run_number }}
-
           deployment_package: deploy.zip
-
           wait_for_deployment: false
 ```
 
-> ⚠️ Replace `YOUR_APP_NAME` and `YOUR_ENV_NAME`.
+Replace:
+
+* `YOUR_APP_NAME` with your Elastic Beanstalk Application Name.
+* `YOUR_ENV_NAME` with your Elastic Beanstalk Environment Name.
 
 ---
 
-## Step 4: Configure GitHub Secrets
+### Verify Folder Structure
 
-Create:
-
-```text
-AWS_ACCESS_KEY_ID
-
-AWS_SECRET_ACCESS_KEY
-
-AWS_SESSION_TOKEN
+```cmd
+tree /f
 ```
 
-> ⚠️ AWS Learner Lab credentials expire periodically.
+Expected output:
 
-Update all credentials whenever you start a new lab session.
+```text
+your-project/
+
+├── .ebextensions/
+│   └── nginx.config
+
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
+
+├── images/
+
+├── index.html
+
+├── script.js
+
+├── style.css
+
+└── README.md
+```
+
+After creating these files, continue with the AWS IAM User setup, GitHub Secrets configuration, and final Git push commands.
 
 ---
 
-## Step 5: Deploy
+### Step 4: Add GitHub Secrets
+
+1. Go to your GitHub repo
+2. Click **Settings** → **Secrets and variables** → **Actions**
+3. Click **"New repository secret"**
+4. Add these 3 secrets:
+
+| Secret Name | Value |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | Your access key from AWS Details |
+| `AWS_SECRET_ACCESS_KEY` | Your secret key from AWS Details |
+| `AWS_SESSION_TOKEN` | Your session token from AWS Details |
+
+### Step 5: Push to GitHub
 
 ```cmd
 git add .
-
-git commit -m "Initial deployment"
-
+git commit -m "Add website files and CI/CD pipeline"
 git push origin main
 ```
 
-Monitor:
+### Step 6: Watch the pipeline run
 
-```text
-GitHub → Actions
+Go to your GitHub repo → click **"Actions"** tab
+
+You will see:
+```
+✅ Checkout code       (~1 second)
+✅ Zip application     (~5 seconds)
+✅ Deploy to EB        (~60 seconds)
+```
+
+### Step 7: Open your live website
+
+```
+http://YOUR_ENV_NAME.eba-xxxxxxxx.us-east-1.elasticbeanstalk.com
 ```
 
 ---
 
-# Every New Lab Session Checklist
+## 6. Project Structure
 
-* [ ] Start Lab
+```
+your-project/
+│
+├── .ebextensions/ (You will create this)
+│   └── nginx.config            # Document root setting
+│
+├── .github/ (You will create this)
+│   └── workflows/
+│       └── deploy.yml          # CI/CD pipeline
+│
+├── images/ (Your application folder or other assets)
+│
+├── index.html                  # Main HTML file (MUST be in root!)
+├── script.js                   # JavaScript file
+├── style.css                   # CSS file
+└── README.md (These are sample files — your actual app files and folders should be placed here in the project root)
+```
 
-* [ ] Open AWS Details
+> ⚠️ **Critical:** Files must be in the **ROOT** of the zip, not inside a subfolder!
 
-* [ ] Copy New Credentials
+---
 
-* [ ] Run aws configure
+## 7. Every New Lab Session Checklist
 
-* [ ] Update Session Token
+Since AWS Learner Lab credentials expire every ~4 hours, do this every session:
 
-* [ ] Verify Connection
+```
+□ Step 1: Start Lab → click "AWS Details" → copy credentials
+□ Step 2: Run aws configure → enter new Access Key + Secret Key
+□ Step 3: Run aws configure set aws_session_token NEW_TOKEN
+□ Step 4: Run aws sts get-caller-identity → verify connection
+□ Step 5: Update GitHub Secrets with new credentials
+□ Step 6: You're ready to work! ✅
+```
 
-* [ ] Update GitHub Secrets
-
-* [ ] Ready to Work
-
-Quick Commands:
-
+### Quick commands:
 ```cmd
+# Configure new credentials
 aws configure
 
-aws configure set aws_session_token YOUR_SESSION_TOKEN
+# Set new session token
+aws configure set aws_session_token YOUR_NEW_TOKEN
 
+# Verify connection
 aws sts get-caller-identity
 ```
 
 ---
 
-# Common Errors and Fixes
+## 8. Common Errors and Fixes
 
-| Error                 | Cause               | Fix                 |
-| --------------------- | ------------------- | ------------------- |
-| ExpiredTokenException | Session expired     | Refresh credentials |
-| InvalidClientTokenId  | Wrong credentials   | Configure again     |
-| 403 Forbidden         | Wrong document root | Check nginx.config  |
-| Files not showing     | Nested folders      | Move to root        |
-| AccessDenied          | Wrong credentials   | Update credentials  |
-| CodePipeline blocked  | IAM restriction     | Use GitHub Actions  |
-
----
-
-# AWS CLI vs AWS Console
-
-|            | AWS CLI      | AWS Console       |
-| ---------- | ------------ | ----------------- |
-| What it is | Command Line | Web UI            |
-| Use Case   | Automation   | Visual Management |
-| Best For   | Developers   | Beginners         |
+| Error | Cause | Fix |
+|---|---|---|
+| `ExpiredTokenException` | Lab session expired | Get new credentials, run `aws configure` again |
+| `InvalidClientTokenId` | Wrong credentials entered | Double-check Access Key and Secret Key |
+| `403 Forbidden` on website | Wrong document root | Check `.ebextensions/nginx.config` |
+| `Engine execution error` | `Procfile` or `buildspec.yml` conflict | Delete those files from repo |
+| Files not showing on site | Files nested in subfolder | Make sure files are in ROOT of project |
+| `No Application named X` | Wrong app name in `deploy.yml` | Copy exact name from AWS Console |
+| `No Environment named X` | Wrong env name in `deploy.yml` | Copy exact name from AWS Console |
+| `AccessDenied` | Wrong/expired credentials | Update GitHub secrets with new credentials |
+| Health showing `Grey/No Data` | Lab IAM restriction | Normal in Learner Labs — site still works! |
+| `CodePipeline not authorized` | Lab blocks CodePipeline IAM | Use GitHub Actions instead |
 
 ---
 
-# AWS Services Used
+## Comparison: AWS CLI vs Console
 
-| Service           | Purpose               |
-| ----------------- | --------------------- |
-| S3                | Deployment artifacts  |
-| EC2               | Application servers   |
-| Elastic Beanstalk | Deployment            |
-| IAM               | Access Management     |
-| STS               | Temporary Credentials |
+| | AWS CLI | AWS Console |
+|---|---|---|
+| **What it is** | Terminal commands | Web browser UI |
+| **Use case** | Quick tasks | Visual management |
+| **Example** | `aws s3 ls` | Click S3 → view buckets |
+| **Best for** | Developers | Beginners/Visual |
 
 ---
 
-# Important Notes for AWS Learner Labs
+## AWS Services Used in This Setup
 
-```text
-✓ Allowed Regions:
+| Service | Purpose |
+|---|---|
+| **S3** | Storage for files and pipeline artifacts |
+| **EC2** | Virtual server running inside Elastic Beanstalk |
+| **Elastic Beanstalk** | PaaS — manages server, scaling, deployment |
+| **IAM** | Identity and access management |
+| **STS** | Temporary security credentials |
 
-us-east-1
+---
 
-us-west-2
+## Important Notes for AWS Learner Labs
 
-✓ Max EC2 Instances: 9
+```
+✅ Allowed regions    : us-east-1 and us-west-2 only
+✅ Max EC2 instances  : 9 running at once
+✅ Max vCPUs          : 32
+✅ EBS volume max     : 100GB
+✅ Budget             : Monitor carefully! ($50 credits)
 
-✓ Max vCPUs: 32
+❌ Cannot create IAM roles
+❌ Cannot modify LabRole trust policy
+❌ CodePipeline blocked (use GitHub Actions instead)
+❌ CodeBuild blocked
 
-✓ Max EBS Storage: 100 GB
-
-✗ Cannot create IAM roles
-
-✗ Cannot modify LabRole
-
-✗ CodePipeline blocked
-
-✗ CodeBuild blocked
+⚠️  Stop/terminate resources when not using to save credits!
+⚠️  EC2, RDS, NAT Gateway eat credits fast!
 ```
 
 ---
 
-# Resources
+## Resources
 
-* AWS CLI Documentation: https://docs.aws.amazon.com/cli/latest/userguide/
-
-* Elastic Beanstalk Documentation: https://docs.aws.amazon.com/elasticbeanstalk/
-
-* GitHub Actions Documentation: https://docs.github.com/en/actions
-
-* AWS CLI Download: https://awscli.amazonaws.com/AWSCLIV2.msi
+- [AWS CLI Documentation](https://docs.aws.amazon.com/cli/latest/userguide/)
+- [Elastic Beanstalk Documentation](https://docs.aws.amazon.com/elasticbeanstalk/)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [AWS CLI v2 Download](https://awscli.amazonaws.com/AWSCLIV2.msi)
 
 ---
 
 *The guide is created based on practical experience with AWS Academy Learner Labs by Nabin Nepali.*
-
-
