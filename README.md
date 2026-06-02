@@ -434,13 +434,15 @@ your-project/
 
 ---
 
+### 🎉 CI/CD Pipeline Completed!
 
+Your CI/CD pipeline is now successfully set up. To test it, make a change to your application's code and push it to GitHub. Navigate to the **Actions** tab in your repository — if there are no errors, you will see a green checkmark (✅), and your changes will be live on Elastic Beanstalk within a few seconds.
 
+---
 
+## Reference Guide
 
-
-
-
+The content below is provided for your reference. It covers important details such as what to do when your AWS session token expires in a new lab session. If you encounter any issues, please refer to the [Common Errors and Fixes](#8-common-errors-and-fixes) section.
 
 ## 7. Every New Lab Session Checklist
 
