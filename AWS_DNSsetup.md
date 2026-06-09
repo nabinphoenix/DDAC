@@ -1,6 +1,8 @@
 # AWS EC2 Deployment with GitHub Actions CI/CD Pipeline
 ### Complete Lab Guide — VPC + EC2 + CI/CD + Backup + Custom Domain
 
+![Architecture Diagram](images/Architecture diagram.png)
+
 ---
 
 ## Table of Contents
